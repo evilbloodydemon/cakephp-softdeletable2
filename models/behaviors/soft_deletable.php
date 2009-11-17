@@ -202,39 +202,15 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 */
 	function beforeFind(&$Model, $queryData) {
 		if ($this->settings[$Model->alias]['find'] && $Model->hasField($this->settings[$Model->alias]['field'])) {
-			$Db =& ConnectionManager::getDataSource($Model->useDbConfig);
-			$include = false;
-
-			if (!empty($queryData['conditions']) && is_string($queryData['conditions'])) {
-				$include = true;
-
-				$fields = array(
-					$Db->name($Model->alias) . '.' . $Db->name($this->settings[$Model->alias]['field']),
-					$Db->name($this->settings[$Model->alias]['field']),
-					$Model->alias . '.' . $this->settings[$Model->alias]['field'],
-					$this->settings[$Model->alias]['field']
-				);
-
-				foreach($fields as $field) {
-					if (preg_match('/^' . preg_quote($field) . '[\s=!]+/i', $queryData['conditions']) || preg_match('/\\x20+' . preg_quote($field) . '[\s=!]+/i', $queryData['conditions'])) {
-						$include = false;
-						break;
-					}
-				}
-			} else if (empty($queryData['conditions']) || (!in_array($this->settings[$Model->alias]['field'], array_keys($queryData['conditions'])) && !in_array($Model->alias . '.' . $this->settings[$Model->alias]['field'], array_keys($queryData['conditions'])))) {
-				$include = true;
+			if (empty($queryData['conditions'])) {
+				$queryData['conditions'] = array();
 			}
-
-			if ($include) {
-				if (empty($queryData['conditions'])) {
-					$queryData['conditions'] = array();
-				}
-
-				if (is_string($queryData['conditions'])) {
-					$queryData['conditions'] = $Db->name($Model->alias) . '.' . $Db->name($this->settings[$Model->alias]['field']) . '!= 1 AND ' . $queryData['conditions'];
-				} else {
-					$queryData['conditions'][$Model->alias . '.' . $this->settings[$Model->alias]['field'] . ' !='] = '1';
-				}
+			$regex = '/^(' . $Model->alias . '\\.)?' . $this->settings[$Model->alias]['field'] . '.*/';
+			$keys = array_keys($queryData['conditions']);
+			$result = preg_grep($regex, $keys);
+			
+			if(empty($result)) {
+				$queryData['conditions'][$Model->alias . '.' . $this->settings[$Model->alias]['field'] . ' !='] = '1';
 			}
 		}
 

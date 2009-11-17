@@ -18,8 +18,6 @@
  * @subpackage app.tests.cases.behaviors
  */
 
-App::import('Core', 'ConnectionManager');
-
 /**
  * Base model that to load SoftDeletable behavior on every test model.
  *
@@ -124,7 +122,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 * @access public
 	 */
 	function testBeforeFind() {
-		$Db =& ConnectionManager::getDataSource($this->DeletableArticle->useDbConfig);
 		$SoftDeletable =& new SoftDeletableBehavior();
 		$SoftDeletable->setup($this->DeletableArticle);
 
@@ -140,37 +137,13 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$expected = array('conditions' => array('DeletableArticle.deleted' => array(0, 1)));
 		$this->assertEqual($result, $expected);
 
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => array('DeletableArticle.id' => '> 0', 'or' => array('DeletableArticle.title' => 'Title', 'DeletableArticle.id' => '5'))));
-		$expected = array('conditions' => array('DeletableArticle.id' => '> 0', 'or' => array('DeletableArticle.title' => 'Title', 'DeletableArticle.id' => '5'), 'DeletableArticle.deleted !=' => '1'));
+		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => array('DeletableArticle.id >' => '0', 'or' => array('DeletableArticle.title' => 'Title', 'DeletableArticle.id' => '5'))));
+		$expected = array('conditions' => array('DeletableArticle.id >' => '0', 'or' => array('DeletableArticle.title' => 'Title', 'DeletableArticle.id' => '5'), 'DeletableArticle.deleted !=' => '1'));
 		$this->assertEqual($result, $expected);
 
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => array('DeletableArticle.id' => '> 0', 'or' => array('DeletableArticle.title' => 'Title', 'DeletableArticle.id' => '5'), 'deleted' => 1)));
-		$expected = array('conditions' => array('DeletableArticle.id' => '> 0', 'or' => array('DeletableArticle.title' => 'Title', 'DeletableArticle.id' => '5'), 'deleted' => 1));
+		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => array('DeletableArticle.id >' => '0', 'or' => array('DeletableArticle.title' => 'Title', 'DeletableArticle.id' => '5'), 'deleted' => 1)));
+		$expected = array('conditions' => array('DeletableArticle.id >' => '0', 'or' => array('DeletableArticle.title' => 'Title', 'DeletableArticle.id' => '5'), 'deleted' => 1));
 		$this->assertEqual($result, $expected);
-
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => 'id=1'));
-		$this->assertPattern('/^' . preg_quote($Db->name('DeletableArticle') . '.' . $Db->name('deleted')) . '\s*!=\s*1\s+AND\s+id\s*=\s*1$/', $result['conditions']);
-
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => '1=1 LEFT JOIN table ON (table.column=DeletableArticle.id)'));
-		$this->assertPattern('/^' . preg_quote($Db->name('DeletableArticle') . '.' . $Db->name('deleted')) . '\s*!=\s*1\s+AND\s+1\s*=\s*1\s+LEFT JOIN table ON ' . preg_quote('(table.column=DeletableArticle.id)') . '$/', $result['conditions']);
-
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => 'deleted=1'));
-		$this->assertPattern('/^' . preg_quote('deleted') . '\s*=\s*1$/', $result['conditions']);
-
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => 'deleted  = 1'));
-		$this->assertPattern('/^' . preg_quote('deleted') . '\s*=\s*1$/', $result['conditions']);
-
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => $Db->name('deleted') . '=1'));
-		$this->assertPattern('/^' . preg_quote($Db->name('deleted')) . '\s*=\s*1$/', $result['conditions']);
-
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => 'id > 0 AND deleted =1'));
-		$this->assertPattern('/^id > 0 AND deleted\s*=\s*1$/', $result['conditions']);
-
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => 'mydeleted=1'));
-		$this->assertPattern('/^' . preg_quote($Db->name('DeletableArticle') . '.' . $Db->name('deleted')) . '\s*!=\s*1\s+AND\s+mydeleted\s*=\s*1$/', $result['conditions']);
-
-		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array('conditions' => 'title = \'record is not deleted\''));
-		$this->assertPattern('/^' . preg_quote($Db->name('DeletableArticle') . '.' . $Db->name('deleted')) . '\s*!=\s*1\s+AND\s+title\s*=\s*\'' . preg_quote('record is not deleted') . '\'$/', $result['conditions']);
 
 		unset($SoftDeletable);
 	}
@@ -254,10 +227,13 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 * @access public
 	 */
 	function testFindStringConditions() {
-		$Db =& ConnectionManager::getDataSource($this->DeletableArticle->useDbConfig);
-
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'title LIKE ' . $Db->value('%Article%'), 'fields' => array('id', 'title')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'title LIKE' => '%Article%'
+			),
+			'fields' => array('id', 'title')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 1, 'title' => 'First Article'
@@ -272,7 +248,13 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'id > 0 AND title LIKE ' . $Db->value('%ir%'), 'fields' => array('id', 'title')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'id >' => 0,
+				'title LIKE' => '%ir%',
+			),
+			'fields' => array('id', 'title')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 1, 'title' => 'First Article'
@@ -287,7 +269,12 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->DeletableArticle->delete(3);
 
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'title LIKE ' . $Db->value('%Article%'), 'fields' => array('id', 'title')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'title LIKE' => '%Article%',
+			),
+			'fields' => array('id', 'title')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 1, 'title' => 'First Article'
@@ -296,7 +283,13 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'title LIKE ' . $Db->value('%Article%') . ' AND deleted=0', 'fields' => array('id', 'title')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'title LIKE' => '%Article%',
+				'deleted' => false,
+			),
+			'fields' => array('id', 'title')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 1, 'title' => 'First Article'
@@ -305,7 +298,13 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'DeletableArticle.deleted = 0 AND title LIKE ' . $Db->value('%Article%'), 'fields' => array('id', 'title')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'DeletableArticle.deleted' => false,
+				'title LIKE' => '%Article%',
+			),
+			'fields' => array('id', 'title')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 1, 'title' => 'First Article'
@@ -314,7 +313,13 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'title LIKE ' . $Db->value('%Article%') . ' AND deleted=1', 'fields' => array('id', 'title')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'title LIKE' => '%Article%',
+				'deleted' => true,
+			),
+			'fields' => array('id', 'title')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 2, 'title' => 'Second Article'
@@ -326,7 +331,13 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'DeletableArticle.deleted = 1 AND title LIKE ' . $Db->value('%Article%'), 'fields' => array('id', 'title')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'DeletableArticle.deleted' => true,
+				'title LIKE' => '%Article%',
+			),
+			'fields' => array('id', 'title')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 2, 'title' => 'Second Article'
@@ -338,7 +349,13 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'title LIKE ' . $Db->value('%Article%') . ' AND (deleted=0 OR deleted = 1)', 'fields' => array('id', 'title', 'deleted')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'title LIKE' => '%Article%',
+				'deleted' => array(0, 1),
+			),
+			'fields' => array('id', 'title', 'deleted')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 1, 'title' => 'First Article', 'deleted' => 0
@@ -351,9 +368,15 @@ class SoftDeletableTestCase extends CakeTestCase {
 			))
 		);
 		$this->assertEqual($result, $expected);
-
+		
 		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
-		$result = $this->DeletableArticle->find('all', array('conditions' => 'title LIKE ' . $Db->value('%ir%') . ' AND DeletableArticle.deleted IN (0,1)', 'fields' => array('id', 'title', 'deleted')));
+		$result = $this->DeletableArticle->find('all', array(
+			'conditions' => array(
+				'title LIKE' => '%ir%',
+				'DeletableArticle.deleted' => array(0,1),
+			),
+			'fields' => array('id', 'title', 'deleted')
+		));
 		$expected = array(
 			array('DeletableArticle' => array(
 				'id' => 1, 'title' => 'First Article', 'deleted' => 0

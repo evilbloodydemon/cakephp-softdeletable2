@@ -105,7 +105,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 * @access public
 	 */
 	function startTest() {
-		$this->DeletableArticle =& new DeletableArticle();
+		$this->DeletableArticle = ClassRegistry::init('DeletableArticle');
 	}
 
 	/**

@@ -1,5 +1,4 @@
 <?php
-/* SVN FILE: $Id$ */
 
 /**
  * SoftDeletable Behavior class file.
@@ -7,7 +6,6 @@
  * @filesource
  * @author Mariano Iglesias
  * @link http://cake-syrup.sourceforge.net/ingredients/soft-deletable-behavior/
- * @version	$Revision$
  * @license	http://www.opensource.org/licenses/mit-license.php The MIT License
  * @package app
  * @subpackage app.models.behaviors
@@ -21,14 +19,6 @@
  */
 class SoftDeletableBehavior extends ModelBehavior {
 	/**
-	 * Contain settings indexed by model name.
-	 *
-	 * @var array
-	 * @access private
-	 */
-	var $__settings = array();
-
-	/**
 	 * Initiate behaviour for the model using settings.
 	 *
 	 * @param object $Model Model using the behaviour
@@ -38,11 +28,11 @@ class SoftDeletableBehavior extends ModelBehavior {
 	function setup(&$Model, $settings = array()) {
 		$default = array('field' => 'deleted', 'field_date' => 'deleted_date', 'delete' => true, 'find' => true);
 
-		if (!isset($this->__settings[$Model->alias])) {
-			$this->__settings[$Model->alias] = $default;
+		if (!isset($this->settings[$Model->alias])) {
+			$this->settings[$Model->alias] = $default;
 		}
 
-		$this->__settings[$Model->alias] = array_merge($this->__settings[$Model->alias], ife(is_array($settings), $settings, array()));
+		$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], ife(is_array($settings), $settings, array()));
 	}
 
 	/**
@@ -54,8 +44,8 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @access public
 	 */
 	function beforeDelete(&$Model, $cascade = true) {
-		if ($this->__settings[$Model->alias]['delete'] && $Model->hasField($this->__settings[$Model->alias]['field'])) {
-			$attributes = $this->__settings[$Model->alias];
+		if ($this->settings[$Model->alias]['delete'] && $Model->hasField($this->settings[$Model->alias]['field'])) {
+			$attributes = $this->settings[$Model->alias];
 			$id = $Model->id;
 
 			$data = array($Model->alias => array(
@@ -98,8 +88,8 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @access public
 	 */
 	function hardDelete(&$Model, $id, $cascade = true) {
-		$onFind = $this->__settings[$Model->alias]['find'];
-		$onDelete = $this->__settings[$Model->alias]['delete'];
+		$onFind = $this->settings[$Model->alias]['find'];
+		$onDelete = $this->settings[$Model->alias]['delete'];
 		$this->enableSoftDeletable($Model, false);
 
 		$deleted = $Model->del($id, $cascade);
@@ -121,12 +111,12 @@ class SoftDeletableBehavior extends ModelBehavior {
 	function purge(&$Model, $cascade = true) {
 		$purged = false;
 
-		if ($Model->hasField($this->__settings[$Model->alias]['field'])) {
-			$onFind = $this->__settings[$Model->alias]['find'];
-			$onDelete = $this->__settings[$Model->alias]['delete'];
+		if ($Model->hasField($this->settings[$Model->alias]['field'])) {
+			$onFind = $this->settings[$Model->alias]['find'];
+			$onDelete = $this->settings[$Model->alias]['delete'];
 			$this->enableSoftDeletable($Model, false);
 
-			$purged = $Model->deleteAll(array($this->__settings[$Model->alias]['field'] => '1'), $cascade);
+			$purged = $Model->deleteAll(array($this->settings[$Model->alias]['field'] => '1'), $cascade);
 
 			$this->enableSoftDeletable($Model, 'delete', $onDelete);
 			$this->enableSoftDeletable($Model, 'find', $onFind);
@@ -145,26 +135,26 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @access public
 	 */
 	function undelete(&$Model, $id = null, $attributes = array()) {
-		if ($Model->hasField($this->__settings[$Model->alias]['field'])) {
+		if ($Model->hasField($this->settings[$Model->alias]['field'])) {
 			if (empty($id)) {
 				$id = $Model->id;
 			}
 
 			$data = array($Model->alias => array(
 				$Model->primaryKey => $id,
-				$this->__settings[$Model->alias]['field'] => '0'
+				$this->settings[$Model->alias]['field'] => '0'
 			));
 
-			if (isset($this->__settings[$Model->alias]['field_date']) && $Model->hasField($this->__settings[$Model->alias]['field_date'])) {
-				$data[$Model->alias][$this->__settings[$Model->alias]['field_date']] = null;
+			if (isset($this->settings[$Model->alias]['field_date']) && $Model->hasField($this->settings[$Model->alias]['field_date'])) {
+				$data[$Model->alias][$this->settings[$Model->alias]['field_date']] = null;
 			}
 
 			if (!empty($attributes)) {
 				$data[$Model->alias] = array_merge($data[$Model->alias], $attributes);
 			}
 
-			$onFind = $this->__settings[$Model->alias]['find'];
-			$onDelete = $this->__settings[$Model->alias]['delete'];
+			$onFind = $this->settings[$Model->alias]['find'];
+			$onDelete = $this->settings[$Model->alias]['delete'];
 			$this->enableSoftDeletable($Model, false);
 
 			$Model->id = $id;
@@ -198,7 +188,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 		}
 
 		foreach($methods as $method) {
-			$this->__settings[$Model->alias][$method] = $enable;
+			$this->settings[$Model->alias][$method] = $enable;
 		}
 	}
 
@@ -211,7 +201,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @access public
 	 */
 	function beforeFind(&$Model, $queryData) {
-		if ($this->__settings[$Model->alias]['find'] && $Model->hasField($this->__settings[$Model->alias]['field'])) {
+		if ($this->settings[$Model->alias]['find'] && $Model->hasField($this->settings[$Model->alias]['field'])) {
 			$Db =& ConnectionManager::getDataSource($Model->useDbConfig);
 			$include = false;
 
@@ -219,10 +209,10 @@ class SoftDeletableBehavior extends ModelBehavior {
 				$include = true;
 
 				$fields = array(
-					$Db->name($Model->alias) . '.' . $Db->name($this->__settings[$Model->alias]['field']),
-					$Db->name($this->__settings[$Model->alias]['field']),
-					$Model->alias . '.' . $this->__settings[$Model->alias]['field'],
-					$this->__settings[$Model->alias]['field']
+					$Db->name($Model->alias) . '.' . $Db->name($this->settings[$Model->alias]['field']),
+					$Db->name($this->settings[$Model->alias]['field']),
+					$Model->alias . '.' . $this->settings[$Model->alias]['field'],
+					$this->settings[$Model->alias]['field']
 				);
 
 				foreach($fields as $field) {
@@ -231,7 +221,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 						break;
 					}
 				}
-			} else if (empty($queryData['conditions']) || (!in_array($this->__settings[$Model->alias]['field'], array_keys($queryData['conditions'])) && !in_array($Model->alias . '.' . $this->__settings[$Model->alias]['field'], array_keys($queryData['conditions'])))) {
+			} else if (empty($queryData['conditions']) || (!in_array($this->settings[$Model->alias]['field'], array_keys($queryData['conditions'])) && !in_array($Model->alias . '.' . $this->settings[$Model->alias]['field'], array_keys($queryData['conditions'])))) {
 				$include = true;
 			}
 
@@ -241,9 +231,9 @@ class SoftDeletableBehavior extends ModelBehavior {
 				}
 
 				if (is_string($queryData['conditions'])) {
-					$queryData['conditions'] = $Db->name($Model->alias) . '.' . $Db->name($this->__settings[$Model->alias]['field']) . '!= 1 AND ' . $queryData['conditions'];
+					$queryData['conditions'] = $Db->name($Model->alias) . '.' . $Db->name($this->settings[$Model->alias]['field']) . '!= 1 AND ' . $queryData['conditions'];
 				} else {
-					$queryData['conditions'][$Model->alias . '.' . $this->__settings[$Model->alias]['field'] . ' !='] = '1';
+					$queryData['conditions'][$Model->alias . '.' . $this->settings[$Model->alias]['field'] . ' !='] = '1';
 				}
 			}
 		}
@@ -259,15 +249,15 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @access public
 	 */
 	function beforeSave(&$Model) {
-		if ($this->__settings[$Model->alias]['find']) {
+		if ($this->settings[$Model->alias]['find']) {
 			if (!isset($this->__backAttributes)) {
 				$this->__backAttributes = array($Model->alias => array());
 			} else if (!isset($this->__backAttributes[$Model->alias])) {
 				$this->__backAttributes[$Model->alias] = array();
 			}
 
-			$this->__backAttributes[$Model->alias]['find'] = $this->__settings[$Model->alias]['find'];
-			$this->__backAttributes[$Model->alias]['delete'] = $this->__settings[$Model->alias]['delete'];
+			$this->__backAttributes[$Model->alias]['find'] = $this->settings[$Model->alias]['find'];
+			$this->__backAttributes[$Model->alias]['delete'] = $this->settings[$Model->alias]['delete'];
 			$this->enableSoftDeletable($Model, false);
 		}
 

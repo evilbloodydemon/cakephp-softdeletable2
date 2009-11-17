@@ -18,7 +18,6 @@
  * @subpackage app.tests.cases.behaviors
  */
 
-App::import('Behavior', 'soft_deletable');
 App::import('Core', 'ConnectionManager');
 
 /**
@@ -34,7 +33,7 @@ class SoftDeletableTestModel extends CakeTestModel {
 	 * @var array
 	 * @access public
 	 */
-	var $actsAs = array('SoftDeletable');
+	var $actsAs = array('SoftDeletable.SoftDeletable');
 }
 
 /**
@@ -98,7 +97,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 * @var array
 	 * @access public
 	 */
-	var $fixtures = array('app.deletable_article', 'app.deletable_comment');
+	var $fixtures = array('plugin.soft_deletable.deletable_article', 'plugin.soft_deletable.deletable_comment');
 
 	/**
 	 * Method executed before each test

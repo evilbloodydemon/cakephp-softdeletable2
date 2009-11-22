@@ -32,7 +32,7 @@ class SoftDeletableTestModel extends CakeTestModel {
 	 * @access public
 	 */
 	var $actsAs = array(
-		'SoftDeletable.SoftDeletable',
+		'SoftDeletable2.SoftDeletable',
 		'Containable',
 	);
 	var $recursive = -1;
@@ -100,7 +100,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 * @var array
 	 * @access public
 	 */
-	var $fixtures = array('plugin.soft_deletable.deletable_article', 'plugin.soft_deletable.deletable_comment');
+	var $fixtures = array('plugin.soft_deletable2.deletable_article', 'plugin.soft_deletable2.deletable_comment');
 
 	/**
 	 * Method executed before each test

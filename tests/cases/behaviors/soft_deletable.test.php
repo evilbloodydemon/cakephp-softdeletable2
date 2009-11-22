@@ -31,7 +31,11 @@ class SoftDeletableTestModel extends CakeTestModel {
 	 * @var array
 	 * @access public
 	 */
-	var $actsAs = array('SoftDeletable.SoftDeletable');
+	var $actsAs = array(
+		'SoftDeletable.SoftDeletable',
+		'Containable',
+	);
+	var $recursive = -1;
 }
 
 /**
@@ -146,7 +150,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->DeletableArticle->delete(2);
 		$this->DeletableArticle->delete(3);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -155,7 +158,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		);
 		$this->assertEqual($result, $expected);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('conditions' => array('DeletableArticle.deleted' => 0), 'fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -165,7 +167,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->enableSoftDeletable(false);
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title', 'deleted')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -190,7 +191,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 	function testSoftDelete() {
 		$this->DeletableArticle->delete(2);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -203,7 +203,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->enableSoftDeletable(false);
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title', 'deleted')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -229,7 +228,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$result = $this->DeletableArticle->hardDelete(2);
 		$this->assertTrue($result);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -242,7 +240,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->enableSoftDeletable(false);
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title', 'deleted')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -264,7 +261,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 	function testPurge() {
 		$this->DeletableArticle->delete(2);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -277,7 +273,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->enableSoftDeletable(false);
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title', 'deleted')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -295,7 +290,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 
 		$this->DeletableArticle->delete(3);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -305,7 +299,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->enableSoftDeletable(false);
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title', 'deleted')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -324,7 +317,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$result = $this->DeletableArticle->purge();
 		$this->assertTrue($result);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -334,7 +326,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$this->DeletableArticle->enableSoftDeletable(false);
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title', 'deleted')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -353,7 +344,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 	function testUndelete() {
 		$this->DeletableArticle->delete(2);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(
@@ -368,7 +358,6 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$result = $this->DeletableArticle->undelete(2);
 		$this->assertTrue($result);
 
-		$this->DeletableArticle->unbindModel(array('hasMany' => array('DeletableComment')));
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
 		$expected = array(
 			array('DeletableArticle' => array(

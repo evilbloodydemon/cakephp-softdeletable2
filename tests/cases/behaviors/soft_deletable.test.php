@@ -476,6 +476,22 @@ class SoftDeletableTestCase extends CakeTestCase {
 
 	function testDeletedDate() {
 		$this->DeletableArticle->delete(1);
+		$this->DeletableArticle->enableSoftDeletable(false);
+		$result = $this->DeletableArticle->read(null, 1);
+		$this->assertPattern('/\\d{4}-\\d{2}-\\d{2}/', $result['DeletableArticle']['deleted_date']);
+		$this->DeletableArticle->enableSoftDeletable(true);
+	}
+
+	function testDeletedDateInt() {
+		$this->DeletableArticle->Behaviors->detach('SoftDeletable');
+		$this->DeletableArticle->Behaviors->attach('SoftDeletable', array(
+			'field_date' => 'deleted_date_int',
+		));
+		$this->DeletableArticle->delete(1);
+		$this->DeletableArticle->enableSoftDeletable(false);
+		$result = $this->DeletableArticle->read(null, 1);
+		$this->assertPattern('/\\d{10}/', $result['DeletableArticle']['deleted_date_int']);
+		$this->DeletableArticle->enableSoftDeletable(true);
 	}
 }
 

@@ -53,7 +53,12 @@ class SoftDeletableBehavior extends ModelBehavior {
 			));
 
 			if (isset($attributes['field_date']) && $Model->hasField($attributes['field_date'])) {
-				$data[$Model->alias][$attributes['field_date']] = date('Y-m-d H:i:s');
+				if($Model->getColumnType($attributes['field_date']) == 'integer') {
+					$date = time();
+				} else {
+					$date = date('Y-m-d H:i:s');
+				}
+				$data[$Model->alias][$attributes['field_date']] = $date;
 			}
 
 			foreach(array_merge(array_keys($data[$Model->alias]), array('field', 'field_date', 'find', 'delete')) as $field) {

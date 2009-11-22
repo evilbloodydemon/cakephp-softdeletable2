@@ -33,6 +33,7 @@ class DeletableArticleFixture extends CakeTestFixture
 		'published' => array('type' => 'integer', 'default' => '0', 'null' => false),
 		'deleted' => array('type' => 'integer', 'default' => '0'),
 		'deleted_date' => 'datetime',
+		'deleted_date_int' => array('type' => 'integer', 'default' => '0'),
 		'created' => 'datetime',
 		'updated' => 'datetime'
 	);
@@ -45,6 +46,8 @@ class DeletableArticleFixture extends CakeTestFixture
 			'body' => 'First Article Body',
 			'published' => '1',
 			'deleted' => '0',
+			'deleted_date' => '',
+			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:39:23',
 			'updated' => '2007-03-18 10:41:31'
 		),
@@ -54,6 +57,8 @@ class DeletableArticleFixture extends CakeTestFixture
 			'body' => 'Second Article Body',
 			'published' => '1',
 			'deleted' => '0',
+			'deleted_date' => '',
+			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:41:23',
 			'updated' => '2007-03-18 10:43:31'
 		),
@@ -63,6 +68,8 @@ class DeletableArticleFixture extends CakeTestFixture
 			'body' => 'Third Article Body',
 			'published' => '1',
 			'deleted' => '0',
+			'deleted_date' => '',
+			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:43:23',
 			'updated' => '2007-03-18 10:45:31'
 		),

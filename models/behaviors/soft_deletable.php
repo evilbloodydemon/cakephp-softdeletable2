@@ -205,13 +205,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 			if (empty($queryData['conditions'])) {
 				$queryData['conditions'] = array();
 			}
-			$regex = '/^(' . $Model->alias . '\\.)?' . $this->settings[$Model->alias]['field'] . '.*/';
-			$keys = array_keys($queryData['conditions']);
-			$result = preg_grep($regex, $keys);
-			
-			if(empty($result)) {
-				$queryData['conditions'][$Model->alias . '.' . $this->settings[$Model->alias]['field'] . ' !='] = '1';
-			}
+			$queryData['conditions'][$Model->alias . '.' . $this->settings[$Model->alias]['field'] . ' !='] = '1';
 		}
 
 		return $queryData;

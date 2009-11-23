@@ -83,7 +83,11 @@ class DeletableComment extends SoftDeletableTestModel {
 	 * @var array
 	 * @access public
 	 */
-	var $belongsTo = array('DeletableArticle');
+	var $belongsTo = array(
+		'DeletableArticle' => array(
+			'counterCache' => true,
+		)
+	);
 }
 
 /**
@@ -492,6 +496,12 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$result = $this->DeletableArticle->read(null, 1);
 		$this->assertPattern('/\\d{10}/', $result['DeletableArticle']['deleted_date_int']);
 		$this->DeletableArticle->enableSoftDeletable(true);
+	}
+
+	function testCounterCache() {
+		$this->DeletableArticle->DeletableComment->delete(1);
+		$result = $this->DeletableArticle->read(null, 1);
+		$this->assertEqual($result['DeletableArticle']['deletable_comment_count'], 3);
 	}
 }
 

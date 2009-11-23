@@ -35,7 +35,8 @@ class DeletableArticleFixture extends CakeTestFixture
 		'deleted_date' => 'datetime',
 		'deleted_date_int' => array('type' => 'integer', 'default' => '0'),
 		'created' => 'datetime',
-		'updated' => 'datetime'
+		'updated' => 'datetime',
+		'deletable_comment_count' => array('type' => 'integer', 'default' => '0'),
 	);
 
 	var $records = array(
@@ -49,7 +50,8 @@ class DeletableArticleFixture extends CakeTestFixture
 			'deleted_date' => '',
 			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:39:23',
-			'updated' => '2007-03-18 10:41:31'
+			'updated' => '2007-03-18 10:41:31',
+			'deletable_comment_count' => 0,
 		),
 		array (
 			'id' => 2,
@@ -60,7 +62,8 @@ class DeletableArticleFixture extends CakeTestFixture
 			'deleted_date' => '',
 			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:41:23',
-			'updated' => '2007-03-18 10:43:31'
+			'updated' => '2007-03-18 10:43:31',
+			'deletable_comment_count' => 0,
 		),
 		array (
 			'id' => 3,
@@ -71,7 +74,8 @@ class DeletableArticleFixture extends CakeTestFixture
 			'deleted_date' => '',
 			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:43:23',
-			'updated' => '2007-03-18 10:45:31'
+			'updated' => '2007-03-18 10:45:31',
+			'deletable_comment_count' => 0,
 		),
 	);
 }

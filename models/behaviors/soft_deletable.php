@@ -70,11 +70,20 @@ class SoftDeletableBehavior extends ModelBehavior {
 			}
 
 			$Model->id = $id;
+			if (!empty($Model->belongsTo)) {
+				$keys = $Model->find('first', array('fields' => $Model->__collectForeignKeys()));
+			}
+
 			$deleted = $Model->save($data, false, array_keys($data[$Model->alias]));
 
-			if ($deleted && $cascade) {
-				$Model->_deleteDependent($id, $cascade);
-				$Model->_deleteLinks($id);
+			if ($deleted) {
+				if($cascade) {
+					$Model->_deleteDependent($id, $cascade);
+					$Model->_deleteLinks($id);
+				}
+				if (!empty($Model->belongsTo)) {
+					$Model->updateCounterCache($keys[$Model->alias]);
+				}
 			}
 
 			return false;

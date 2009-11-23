@@ -1,28 +1,16 @@
 <?php
-/* SVN FILE: $Id$ */
-
 /**
- * Test cases for SoftDeletable Behavior, which are basically testing methods to test several
- * aspects of slug functionality.
- *
- * Go to the SoftDeletable Behavior page at Cake Syrup to learn more about it:
- *
- * http://cake-syrup.sourceforge.net/ingredients/soft-deletable-behavior/
- *
+ * Test cases for SoftDeletable Behavior
+ * 
  * @filesource
  * @author Mariano Iglesias
- * @link http://cake-syrup.sourceforge.net/ingredients/soft-deletable-behavior/
- * @version	$Revision$
+ * @author Igor Fomin (evilbloodydemon@gmail.com)
+ * @link http://github.com/evilbloodydemon/cakephp-softdeletable2
  * @license	http://www.opensource.org/licenses/mit-license.php The MIT License
- * @package app.tests
- * @subpackage app.tests.cases.behaviors
  */
 
 /**
  * Base model that to load SoftDeletable behavior on every test model.
- *
- * @package app.tests
- * @subpackage app.tests.cases.behaviors
  */
 class SoftDeletableTestModel extends CakeTestModel {
 	/**
@@ -40,9 +28,6 @@ class SoftDeletableTestModel extends CakeTestModel {
 
 /**
  * Model used in test case.
- *
- * @package	app.tests
- * @subpackage app.tests.cases.behaviors
  */
 class DeletableArticle extends SoftDeletableTestModel {
 	/**
@@ -64,9 +49,6 @@ class DeletableArticle extends SoftDeletableTestModel {
 
 /**
  * Model used in test case.
- *
- * @package	app.tests
- * @subpackage app.tests.cases.behaviors
  */
 class DeletableComment extends SoftDeletableTestModel {
 	/**
@@ -93,8 +75,6 @@ class DeletableComment extends SoftDeletableTestModel {
 /**
  * Test case for SoftDeletable Behavior
  *
- * @package app.tests
- * @subpackage app.tests.cases.models
  * @property DeletableArticle $DeletableArticle
  */
 class SoftDeletableTestCase extends CakeTestCase {

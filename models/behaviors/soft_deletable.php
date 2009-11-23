@@ -2,20 +2,18 @@
 
 /**
  * SoftDeletable Behavior class file.
+ * Based on the SoftDeletable Behavior by Mariano Iglesias
+ * http://cake-syrup.sourceforge.net/ingredients/soft-deletable-behavior/
  *
  * @filesource
  * @author Mariano Iglesias
- * @link http://cake-syrup.sourceforge.net/ingredients/soft-deletable-behavior/
+ * @author Igor Fomin (evilbloodydemon@gmail.com)
+ * @link http://github.com/evilbloodydemon/cakephp-softdeletable2
  * @license	http://www.opensource.org/licenses/mit-license.php The MIT License
- * @package app
- * @subpackage app.models.behaviors
  */
 
 /**
  * Model behavior to support soft deleting records.
- *
- * @package app
- * @subpackage app.models.behaviors
  */
 class SoftDeletableBehavior extends ModelBehavior {
 	/**

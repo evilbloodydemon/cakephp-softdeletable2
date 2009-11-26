@@ -104,7 +104,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 		$onDelete = $this->settings[$Model->alias]['delete'];
 		$this->enableSoftDeletable($Model, false);
 
-		$deleted = $Model->del($id, $cascade);
+		$deleted = $Model->delete($id, $cascade);
 
 		$this->enableSoftDeletable($Model, 'delete', $onDelete);
 		$this->enableSoftDeletable($Model, 'find', $onFind);

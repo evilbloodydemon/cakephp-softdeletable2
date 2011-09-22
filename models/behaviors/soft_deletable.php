@@ -4,10 +4,22 @@
  * SoftDeletable Behavior class file.
  * Based on the SoftDeletable Behavior by Mariano Iglesias
  * http://cake-syrup.sourceforge.net/ingredients/soft-deletable-behavior/
+ * 
+ * Updated by Igor Fomin to CakePHP 1.3
+ * http://github.com/evilbloodydemon/cakephp-softdeletable2
+ * 
+ * Forked by Scott Donnelly to implement the following changes:
+ * 
+ * - if deleted and deleted_date are the same field, NULL in DB represents
+ * 		not deleted, and a valid date represents deletion on that date
+ * 
+ * - the user who soft_deleted the entry is also logged if required, using the
+ * 		deleter_id field. The deleter field is NULL if no user is logged in.
  *
  * @filesource
  * @author Mariano Iglesias
  * @author Igor Fomin (evilbloodydemon@gmail.com)
+ * @author Scott Donnelly (scott@donnel.ly)
  * @link http://github.com/evilbloodydemon/cakephp-softdeletable2
  * @license	http://www.opensource.org/licenses/mit-license.php The MIT License
  */
@@ -24,7 +36,14 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @access public
 	 */
 	function setup(&$Model, $settings = array()) {
-		$default = array('field' => 'deleted', 'field_date' => 'deleted_date', 'delete' => true, 'find' => true);
+		$default = array(
+			'field' => 'deleted',
+			'field_date' => 'deleted',
+			'delete' => true,
+			'find' => true,
+			'log_deleter' => false,
+			'field_deleter' => 'deleter_id'
+		);
 
 		if (!isset($this->settings[$Model->alias])) {
 			$this->settings[$Model->alias] = $default;
@@ -32,6 +51,23 @@ class SoftDeletableBehavior extends ModelBehavior {
 
 		$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], ife(is_array($settings), $settings, array()));
 	}
+	
+	/**
+	 * Run in app_controller or controller's beforeFilter, in order to pass the 
+	 * current session user's Id to SoftDeletable. Something like this will do:
+	 * 
+	 * if (sizeof($this->uses) && $this->{$this->modelClass}->Behaviors->attached('SoftDeletable')) 
+	 * 		$this->{$this->modelClass}->setUserId($this->Auth->user('id')); 
+	 *
+	 * @param object $Model Model about to be deleted
+	 * @param integer $userId the user ID of the currently logged in user
+	 * @access public
+	 */
+	function setUserId(&$Model, $userId = null) { 
+        if ($userId) { 
+            $this->userId = $userId; 
+        } 
+    } 
 
 	/**
 	 * Run before a model is deleted, used to do a soft delete when needed.
@@ -46,9 +82,11 @@ class SoftDeletableBehavior extends ModelBehavior {
 			$attributes = $this->settings[$Model->alias];
 			$id = $Model->id;
 
-			$data = array($Model->alias => array(
-				$attributes['field'] => 1
-			));
+			if (isset($attributes['field'])) {
+				$data = array($Model->alias => array(
+					$attributes['field'] => 1
+				));
+			}
 
 			if (isset($attributes['field_date']) && $Model->hasField($attributes['field_date'])) {
 				if($Model->getColumnType($attributes['field_date']) == 'integer') {
@@ -58,8 +96,15 @@ class SoftDeletableBehavior extends ModelBehavior {
 				}
 				$data[$Model->alias][$attributes['field_date']] = $date;
 			}
+			
+			if (isset($attributes['log_deleter']) && isset($attributes['field_deleter'])
+				&& $attributes['log_deleter'] && $Model->hasField($attributes['field_deleter']) ) {
+				
+				// set the id of the deleter as currently logged in user's id		
+				$data[$Model->alias][$attributes['field_deleter']] = $this->userId;			
+			}
 
-			foreach(array_merge(array_keys($data[$Model->alias]), array('field', 'field_date', 'find', 'delete')) as $field) {
+			foreach(array_merge(array_keys($data[$Model->alias]), array('field', 'field_date', 'find', 'delete', 'log_deleter', 'field_deleter')) as $field) {
 				unset($attributes[$field]);
 			}
 
@@ -128,7 +173,43 @@ class SoftDeletableBehavior extends ModelBehavior {
 			$onDelete = $this->settings[$Model->alias]['delete'];
 			$this->enableSoftDeletable($Model, false);
 
-			$purged = $Model->deleteAll(array($this->settings[$Model->alias]['field'] => '1'), $cascade);
+			if ($this->settings[$Model->alias]['field'] != $this->settings[$Model->alias]['field_date']) {
+				$purged = $Model->deleteAll(array($this->settings[$Model->alias]['field'] => '1'), $cascade);
+			} else {
+				$purged = $Model->deleteAll(array($this->settings[$Model->alias]['field'] => 'IS NOT NULL'), $cascade);
+			}
+
+			$this->enableSoftDeletable($Model, 'delete', $onDelete);
+			$this->enableSoftDeletable($Model, 'find', $onFind);
+		}
+
+		return $purged;
+	}
+	
+	/**
+	 * Permanently deletes all records that were soft deleted by currently
+	 * logged in user.
+	 *
+	 * @param object $Model Model from where the method is being executed.
+	 * @param boolean $cascade Also delete dependent records
+	 * @return boolean Result of the operation.
+	 * @access public
+	 */
+	function purgeMy(&$Model, $cascade = true) {
+		$purged = false;
+
+		if ($Model->hasField($this->settings[$Model->alias]['field'])) {
+			$onFind = $this->settings[$Model->alias]['find'];
+			$onDelete = $this->settings[$Model->alias]['delete'];
+			$this->enableSoftDeletable($Model, false);
+			
+			if ($this->settings[$Model->alias]['field'] == $this->settings[$Model->alias]['field_date']) $deletedCriteria = null;
+			else $deletedCriteria = 0;
+
+			$purged = $Model->deleteAll(array(
+				array('not' => array($this->settings[$Model->alias]['field'] => $purgeCriteria)), 
+				$this->settings[$Model->alias]['field_deleter'] => $this->userId, 
+			), $cascade);
 
 			$this->enableSoftDeletable($Model, 'delete', $onDelete);
 			$this->enableSoftDeletable($Model, 'find', $onFind);
@@ -217,7 +298,11 @@ class SoftDeletableBehavior extends ModelBehavior {
 			if (empty($queryData['conditions'])) {
 				$queryData['conditions'] = array();
 			}
-			$queryData['conditions'][$Model->alias . '.' . $this->settings[$Model->alias]['field'] . ' !='] = '1';
+			
+			if ($this->settings[$Model->alias]['field'] == $this->settings[$Model->alias]['field_date']) $deletedCriteria = null;
+			else $deletedCriteria = 0;
+			
+			$queryData['conditions'][$Model->alias . '.' . $this->settings[$Model->alias]['field']] = $deletedCriteria;
 		}
 
 		return $queryData;

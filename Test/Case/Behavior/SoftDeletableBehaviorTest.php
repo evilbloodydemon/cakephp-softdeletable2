@@ -16,14 +16,14 @@ class SoftDeletableTestModel extends CakeTestModel {
 	/**
 	 * Behaviors for this model
 	 *
-	 * @var array
+	 * @public array
 	 * @access public
 	 */
-	var $actsAs = array(
-		'SoftDeletable2.SoftDeletable',
+	public $actsAs = array(
+		'SoftDeletable.SoftDeletable',
 		'Containable',
 	);
-	var $recursive = -1;
+	public $recursive = -1;
 }
 
 /**
@@ -33,18 +33,18 @@ class DeletableArticle extends SoftDeletableTestModel {
 	/**
 	 * Name for this model
 	 *
-	 * @var string
+	 * @public string
 	 * @access public
 	 */
-	var $name = 'DeletableArticle';
+	public $name = 'DeletableArticle';
 
 	/**
 	 * hasMany releations for this model
 	 *
-	 * @var array
+	 * @public array
 	 * @access public
 	 */
-	var $hasMany = array('DeletableComment' => array('dependent' => true));
+	public $hasMany = array('DeletableComment' => array('dependent' => true));
 }
 
 /**
@@ -54,18 +54,18 @@ class DeletableComment extends SoftDeletableTestModel {
 	/**
 	 * Name for this model
 	 *
-	 * @var string
+	 * @public string
 	 * @access public
 	 */
-	var $name = 'DeletableComment';
+	public $name = 'DeletableComment';
 
 	/**
 	 * belongsTo releations for this model
 	 *
-	 * @var array
+	 * @public array
 	 * @access public
 	 */
-	var $belongsTo = array(
+	public $belongsTo = array(
 		'DeletableArticle' => array(
 			'counterCache' => true,
 		)
@@ -81,17 +81,17 @@ class SoftDeletableTestCase extends CakeTestCase {
 	/**
 	 * Fixtures associated with this test case
 	 *
-	 * @var array
+	 * @public array
 	 * @access public
 	 */
-	var $fixtures = array('plugin.soft_deletable2.deletable_article', 'plugin.soft_deletable2.deletable_comment');
+	public $fixtures = array('plugin.soft_deletable.deletable_article', 'plugin.soft_deletable.deletable_comment');
 
 	/**
 	 * Method executed before each test
 	 *
 	 * @access public
 	 */
-	function startTest() {
+	public function startTest() {
 		$this->DeletableArticle = ClassRegistry::init('DeletableArticle');
 	}
 
@@ -100,7 +100,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	function endTest() {
+	public function endTest() {
 		unset($this->DeletableArticle);
 		ClassRegistry::flush();
 	}
@@ -110,7 +110,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	function testBeforeFind() {
+	public function testBeforeFind() {
 		$SoftDeletable =& new SoftDeletableBehavior();
 		$SoftDeletable->setup($this->DeletableArticle);
 
@@ -130,7 +130,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	function testFind() {
+	public function testFind() {
 		$this->DeletableArticle->delete(2);
 		$this->DeletableArticle->delete(3);
 
@@ -172,7 +172,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	function testSoftDelete() {
+	public function testSoftDelete() {
 		$this->DeletableArticle->delete(2);
 
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
@@ -208,7 +208,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	function testHardDelete() {
+	public function testHardDelete() {
 		$result = $this->DeletableArticle->hardDelete(2);
 		$this->assertTrue($result);
 
@@ -242,7 +242,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	function testPurge() {
+	public function testPurge() {
 		$this->DeletableArticle->delete(2);
 
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
@@ -325,7 +325,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	function testUndelete() {
+	public function testUndelete() {
 		$this->DeletableArticle->delete(2);
 
 		$result = $this->DeletableArticle->find('all', array('fields' => array('id', 'title')));
@@ -362,7 +362,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	function testRecursive() {
+	public function testRecursive() {
 		$result = $this->DeletableArticle->DeletableComment->find('all', array('fields' => array('id', 'comment')));
 		$expected = array(
 			array('DeletableComment' => array(
@@ -458,7 +458,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->DeletableArticle->DeletableComment->enableSoftDeletable(true);
 	}
 
-	function testDeletedDate() {
+	public function testDeletedDate() {
 		$this->DeletableArticle->delete(1);
 		$this->DeletableArticle->enableSoftDeletable(false);
 		$result = $this->DeletableArticle->read(null, 1);
@@ -466,7 +466,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->DeletableArticle->enableSoftDeletable(true);
 	}
 
-	function testDeletedDateInt() {
+	public function testDeletedDateInt() {
 		$this->DeletableArticle->Behaviors->detach('SoftDeletable');
 		$this->DeletableArticle->Behaviors->attach('SoftDeletable', array(
 			'field_date' => 'deleted_date_int',
@@ -478,11 +478,9 @@ class SoftDeletableTestCase extends CakeTestCase {
 		$this->DeletableArticle->enableSoftDeletable(true);
 	}
 
-	function testCounterCache() {
+	public function testCounterCache() {
 		$this->DeletableArticle->DeletableComment->delete(1);
 		$result = $this->DeletableArticle->read(null, 1);
 		$this->assertEqual($result['DeletableArticle']['deletable_comment_count'], 3);
 	}
 }
-
-?>

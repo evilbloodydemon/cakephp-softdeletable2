@@ -23,14 +23,14 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @param array $settings Settings to override for model.
 	 * @access public
 	 */
-	function setup(&$Model, $settings = array()) {
+	public function setup(&$Model, $settings = array()) {
 		$default = array('field' => 'deleted', 'field_date' => 'deleted_date', 'delete' => true, 'find' => true);
 
 		if (!isset($this->settings[$Model->alias])) {
 			$this->settings[$Model->alias] = $default;
 		}
 
-		$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], ife(is_array($settings), $settings, array()));
+		$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], is_array($settings) ? $settings : array());
 	}
 
 	/**
@@ -41,7 +41,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @return boolean Set to true to continue with delete, false otherwise
 	 * @access public
 	 */
-	function beforeDelete(&$Model, $cascade = true) {
+	public function beforeDelete(&$Model, $cascade = true) {
 		if ($this->settings[$Model->alias]['delete'] && $Model->hasField($this->settings[$Model->alias]['field'])) {
 			$attributes = $this->settings[$Model->alias];
 			$id = $Model->id;
@@ -69,15 +69,15 @@ class SoftDeletableBehavior extends ModelBehavior {
 
 			$Model->id = $id;
 			if (!empty($Model->belongsTo)) {
-				$keys = $Model->find('first', array('fields' => $Model->__collectForeignKeys()));
+				$keys = $Model->find('first', array('fields' => $Model->dispatchMethod('_collectForeignKeys')));
 			}
 
 			$deleted = $Model->save($data, false, array_keys($data[$Model->alias]));
 
 			if ($deleted) {
 				if($cascade) {
-					$Model->_deleteDependent($id, $cascade);
-					$Model->_deleteLinks($id);
+					$Model->dispatchMethod('_deleteDependent', array($id, $cascade));
+					$Model->dispatchMethod('_deleteLinks', array($id));
 				}
 				if (!empty($Model->belongsTo)) {
 					$Model->updateCounterCache($keys[$Model->alias]);
@@ -99,7 +99,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @return boolean Result of the operation.
 	 * @access public
 	 */
-	function hardDelete(&$Model, $id, $cascade = true) {
+	public function hardDelete(&$Model, $id, $cascade = true) {
 		$onFind = $this->settings[$Model->alias]['find'];
 		$onDelete = $this->settings[$Model->alias]['delete'];
 		$this->enableSoftDeletable($Model, false);
@@ -120,7 +120,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @return boolean Result of the operation.
 	 * @access public
 	 */
-	function purge(&$Model, $cascade = true) {
+	public function purge(&$Model, $cascade = true) {
 		$purged = false;
 
 		if ($Model->hasField($this->settings[$Model->alias]['field'])) {
@@ -146,7 +146,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @return boolean Result of the operation.
 	 * @access public
 	 */
-	function undelete(&$Model, $id = null, $attributes = array()) {
+	public function undelete(&$Model, $id = null, $attributes = array()) {
 		if ($Model->hasField($this->settings[$Model->alias]['field'])) {
 			if (empty($id)) {
 				$id = $Model->id;
@@ -189,7 +189,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @param boolean $enable If specified method should be overriden.
 	 * @access public
 	 */
-	function enableSoftDeletable(&$Model, $methods, $enable = true) {
+	public function enableSoftDeletable(&$Model, $methods, $enable = true) {
 		if (is_bool($methods)) {
 			$enable = $methods;
 			$methods = array('find', 'delete');
@@ -212,7 +212,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @return mixed Set to false to abort find operation, or return an array with data used to execute query
 	 * @access public
 	 */
-	function beforeFind(&$Model, $queryData) {
+	public function beforeFind(&$Model, $queryData) {
 		if ($this->settings[$Model->alias]['find'] && $Model->hasField($this->settings[$Model->alias]['field'])) {
 			if (empty($queryData['conditions'])) {
 				$queryData['conditions'] = array();
@@ -230,7 +230,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @return boolean True if the operation should continue, false if it should abort
 	 * @access public
 	 */
-	function beforeSave(&$Model) {
+	public function beforeSave(&$Model) {
 		if ($this->settings[$Model->alias]['find']) {
 			if (!isset($this->__backAttributes)) {
 				$this->__backAttributes = array($Model->alias => array());
@@ -253,7 +253,7 @@ class SoftDeletableBehavior extends ModelBehavior {
 	 * @param boolean $created True if this save created a new record
 	 * @access public
 	 */
-	function afterSave(&$Model, $created) {
+	public function afterSave(&$Model, $created) {
 		if (isset($this->__backAttributes[$Model->alias]['find'])) {
 			$this->enableSoftDeletable($Model, 'find', $this->__backAttributes[$Model->alias]['find']);
 			$this->enableSoftDeletable($Model, 'delete', $this->__backAttributes[$Model->alias]['delete']);
@@ -262,4 +262,3 @@ class SoftDeletableBehavior extends ModelBehavior {
 		}
 	}
 }
-?>

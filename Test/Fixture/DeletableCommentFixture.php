@@ -14,9 +14,9 @@
  */
 class DeletableCommentFixture extends CakeTestFixture
 {
-	var $name = 'DeletableComment';
+	public $name = 'DeletableComment';
 
-	var $fields = array(
+	public $fields = array(
 		'id' => array('type' => 'integer', 'key' => 'primary', 'extra'=> 'auto_increment'),
 		'deletable_article_id' => array('type' => 'integer', 'null'=>false),
 		'comment' => 'text',
@@ -25,7 +25,7 @@ class DeletableCommentFixture extends CakeTestFixture
 		'updated' => 'datetime'
 	);
 
-	var $records = array(
+	public $records = array(
 		array('id' => 1, 'deletable_article_id' => 1, 'comment' => 'First Comment for First Article', 'deleted' => '0', 'created' => '2007-03-18 10:45:23', 'updated' => '2007-03-18 10:47:31'),
 		array('id' => 2, 'deletable_article_id' => 1, 'comment' => 'Second Comment for First Article', 'deleted' => '0', 'created' => '2007-03-18 10:47:23', 'updated' => '2007-03-18 10:49:31'),
 		array('id' => 3, 'deletable_article_id' => 1, 'comment' => 'Third Comment for First Article', 'deleted' => '0', 'created' => '2007-03-18 10:49:23', 'updated' => '2007-03-18 10:51:31'),
@@ -37,5 +37,3 @@ class DeletableCommentFixture extends CakeTestFixture
 		array('id' => 9, 'deletable_article_id' => 3, 'comment' => 'Third Comment for Third Article', 'deleted' => '0', 'created' => '2007-03-18 11:01:23', 'updated' => '2007-03-18 11:03:31')
 	);
 }
-
-?>

@@ -1,7 +1,7 @@
 <?php
 /**
  * Test cases for SoftDeletable Behavior
- * 
+ *
  * @filesource
  * @author Mariano Iglesias
  * @author Igor Fomin (evilbloodydemon@gmail.com)
@@ -91,7 +91,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	public function startTest() {
+	public function setUp() {
 		$this->DeletableArticle = ClassRegistry::init('DeletableArticle');
 	}
 
@@ -100,7 +100,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 *
 	 * @access public
 	 */
-	public function endTest() {
+	public function tearDown() {
 		unset($this->DeletableArticle);
 		ClassRegistry::flush();
 	}
@@ -111,7 +111,7 @@ class SoftDeletableTestCase extends CakeTestCase {
 	 * @access public
 	 */
 	public function testBeforeFind() {
-		$SoftDeletable =& new SoftDeletableBehavior();
+		$SoftDeletable = new SoftDeletableBehavior();
 		$SoftDeletable->setup($this->DeletableArticle);
 
 		$result = $SoftDeletable->beforeFind($this->DeletableArticle, array());

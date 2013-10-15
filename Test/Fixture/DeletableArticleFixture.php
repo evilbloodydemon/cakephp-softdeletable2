@@ -15,9 +15,9 @@
  */
 class DeletableArticleFixture extends CakeTestFixture
 {
-	var $name = 'DeletableArticle';
+	public $name = 'DeletableArticle';
 
-	var $fields = array(
+	public $fields = array(
 		'id' => array('type' => 'integer', 'key' => 'primary'),
 		'title' => array('type' => 'string', 'null' => false),
 		'body' => 'text',
@@ -30,7 +30,7 @@ class DeletableArticleFixture extends CakeTestFixture
 		'deletable_comment_count' => array('type' => 'integer', 'default' => '0'),
 	);
 
-	var $records = array(
+	public $records = array(
 		array (
 			'id' => 1,
 			'title' =>
@@ -38,7 +38,7 @@ class DeletableArticleFixture extends CakeTestFixture
 			'body' => 'First Article Body',
 			'published' => '1',
 			'deleted' => '0',
-			'deleted_date' => '',
+			'deleted_date' => null,
 			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:39:23',
 			'updated' => '2007-03-18 10:41:31',
@@ -50,7 +50,7 @@ class DeletableArticleFixture extends CakeTestFixture
 			'body' => 'Second Article Body',
 			'published' => '1',
 			'deleted' => '0',
-			'deleted_date' => '',
+			'deleted_date' => null,
 			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:41:23',
 			'updated' => '2007-03-18 10:43:31',
@@ -62,7 +62,7 @@ class DeletableArticleFixture extends CakeTestFixture
 			'body' => 'Third Article Body',
 			'published' => '1',
 			'deleted' => '0',
-			'deleted_date' => '',
+			'deleted_date' => null,
 			'deleted_date_int' => 0,
 			'created' => '2007-03-18 10:43:23',
 			'updated' => '2007-03-18 10:45:31',
@@ -70,5 +70,3 @@ class DeletableArticleFixture extends CakeTestFixture
 		),
 	);
 }
-
-?>
